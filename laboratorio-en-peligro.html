@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laboratorio en peligro</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root{
+    --bg-deep:#0a1a26;
+    --bg-deep2:#0d2233;
+    --bg-panel:#122c40;
+    --bg-panel2:#173a53;
+    --line:#204a67;
+    --text:#e7f1f4;
+    --text-dim:#8fb0c1;
+    --cyan:#5fd0e8;
+    --green:#6fce7f;
+    --amber:#f0a83c;
+    --red:#e2532a;
+    --red-deep:#a3311a;
+    --shadow: 0 20px 50px rgba(0,0,0,.45);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(1100px 700px at 12% -10%, #133247 0%, transparent 60%),
+      radial-gradient(900px 600px at 110% 10%, #0f2739 0%, transparent 55%),
+      var(--bg-deep);
+    color:var(--text);
+    font-family:'IBM Plex Mono', ui-monospace, monospace;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:22px;
+    overflow-x:hidden;
+  }
+  .display{font-family:'Space Grotesk', ui-sans-serif, sans-serif;}
+
+  /* ---------- background grid, blueprint feel ---------- */
+  .grid-overlay{
+    position:fixed; inset:0; pointer-events:none; z-index:0;
+    background-image:
+      linear-gradient(rgba(95,208,232,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(95,208,232,.05) 1px, transparent 1px);
+    background-size: 34px 34px;
+    mask-image: radial-gradient(1200px 800px at 50% 30%, black, transparent 90%);
+  }
+
+  .app{
+    position:relative; z-index:1;
+    width:100%;
+    max-width:900px;
+  }
+
+  /* ================= SETUP SCREEN ================= */
+  .card{
+    background: linear-gradient(180deg, var(--bg-panel2), var(--bg-panel));
+    border:1px solid var(--line);
+    border-radius:18px;
+    box-shadow:var(--shadow);
+    padding:34px;
+  }
+
+  .kicker{
+    color:var(--cyan);
+    font-size:13px;
+    letter-spacing:.02em;
+    margin:0 0 6px;
+  }
+  h1.title{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:clamp(28px,4vw,40px);
+    font-weight:700;
+    margin:0 0 10px;
+    line-height:1.08;
+  }
+  p.lede{
+    color:var(--text-dim);
+    max-width:56ch;
+    line-height:1.55;
+    margin:0 0 26px;
+    font-size:14.5px;
+  }
+
+  .field{ margin-bottom:20px; }
+  .field label{
+    display:block; font-size:12.5px; color:var(--text-dim); margin-bottom:8px;
+  }
+  .team-count{
+    display:flex; gap:10px;
+  }
+  .count-btn{
+    flex:1;
+    padding:12px 0;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:var(--bg-deep2);
+    color:var(--text);
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:16px;
+    cursor:pointer;
+    transition:.15s;
+  }
+  .count-btn:hover{border-color:var(--cyan);}
+  .count-btn.active{
+    background:var(--cyan);
+    color:#04222f;
+    border-color:var(--cyan);
+  }
+
+  .team-names{ display:grid; gap:10px; }
+  .team-name-row{ display:flex; align-items:center; gap:10px; }
+  .swatch{ width:12px; height:12px; border-radius:3px; flex:0 0 auto; }
+  .team-name-row input{
+    flex:1;
+    background:var(--bg-deep2);
+    border:1px solid var(--line);
+    color:var(--text);
+    padding:10px 12px;
+    border-radius:8px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:14px;
+  }
+  .team-name-row input:focus{outline:2px solid var(--cyan); outline-offset:1px;}
+
+  .start-btn{
+    margin-top:8px;
+    width:100%;
+    padding:16px;
+    border-radius:12px;
+    border:none;
+    background:linear-gradient(180deg,#7addb0,var(--green));
+    color:#06301c;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:17px;
+    letter-spacing:.01em;
+    cursor:pointer;
+    box-shadow:0 10px 24px rgba(111,206,127,.25);
+    transition:transform .12s;
+  }
+  .start-btn:hover{transform:translateY(-1px);}
+  .start-btn:active{transform:translateY(0);}
+
+  .sound-row{
+    display:flex; align-items:center; gap:10px; margin-top:18px;
+    color:var(--text-dim); font-size:13px;
+  }
+  .toggle{
+    width:38px;height:22px;border-radius:20px;background:var(--bg-deep2);
+    border:1px solid var(--line); position:relative; cursor:pointer; flex:0 0 auto;
+  }
+  .toggle::after{
+    content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;
+    background:var(--text-dim); transition:.18s;
+  }
+  .toggle.on{background:rgba(111,206,127,.25); border-color:var(--green);}
+  .toggle.on::after{left:18px; background:var(--green);}
+
+  /* ================= GAME SCREEN ================= */
+  .hidden{ display:none !important; }
+
+  .game-shell{
+    background: linear-gradient(180deg, var(--bg-panel2), var(--bg-panel));
+    border:1px solid var(--line);
+    border-radius:18px;
+    box-shadow:var(--shadow);
+    overflow:hidden;
+  }
+
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 20px;
+    border-bottom:1px solid var(--line);
+    background:rgba(0,0,0,.12);
+  }
+  .topbar .brand{ display:flex; align-items:center; gap:10px; }
+  .brand .dot{ width:9px; height:9px; border-radius:50%; background:var(--amber); box-shadow:0 0 10px var(--amber); }
+  .brand span{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:15px; }
+  .round-tag{ color:var(--text-dim); font-size:12.5px; }
+  .icon-btn{
+    background:transparent; border:1px solid var(--line); color:var(--text-dim);
+    width:34px;height:34px;border-radius:9px; cursor:pointer; font-size:15px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .icon-btn:hover{ color:var(--text); border-color:var(--cyan); }
+
+  .scoreboard{
+    display:flex; gap:10px; padding:14px 20px 0;
+    flex-wrap:wrap;
+  }
+  .team-chip{
+    flex:1; min-width:120px;
+    background:var(--bg-deep2);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:10px 12px;
+    position:relative;
+    transition:.2s;
+  }
+  .team-chip.active{
+    border-color: var(--cyan);
+    box-shadow:0 0 0 1px var(--cyan), 0 8px 18px rgba(95,208,232,.15);
+  }
+  .team-chip .t-name{ font-size:12px; color:var(--text-dim); display:flex; align-items:center; gap:6px;}
+  .team-chip .t-score{ font-family:'Space Grotesk',sans-serif; font-size:22px; font-weight:700; margin-top:2px;}
+  .team-chip .turn-flag{
+    position:absolute; top:-8px; right:8px;
+    font-size:9.5px; background:var(--cyan); color:#04222f; padding:2px 7px;
+    border-radius:6px; font-weight:700; letter-spacing:.02em;
+    opacity:0; transform:translateY(3px); transition:.2s;
+  }
+  .team-chip.active .turn-flag{ opacity:1; transform:translateY(0); }
+
+  .stage{
+    display:grid;
+    grid-template-columns: 200px 1fr;
+    gap:22px;
+    padding:22px 20px 6px;
+    align-items:center;
+  }
+  @media (max-width:620px){
+    .stage{ grid-template-columns:1fr; }
+    .lab-scene{ margin:0 auto; }
+  }
+
+  /* --- lab scene svg --- */
+  .lab-scene{ width:190px; height:190px; position:relative; }
+  .lab-scene svg{ width:100%; height:100%; overflow:visible; }
+  .lab-scene.shake{ animation:shake .5s ease; }
+  @keyframes shake{
+    10%,90%{ transform:translate3d(-1px,0,0); }
+    20%,80%{ transform:translate3d(2px,0,0); }
+    30%,50%,70%{ transform:translate3d(-4px,0,0); }
+    40%,60%{ transform:translate3d(4px,0,0); }
+  }
+
+  .liquid{ transition: y .35s ease, height .35s ease, fill .4s ease; }
+  .bubble{ opacity:0; }
+  .bubble.show{ animation:bubbleUp 1.6s ease-in infinite; }
+  @keyframes bubbleUp{
+    0%{ opacity:0; transform:translateY(0) scale(.6);}
+    15%{opacity:.85;}
+    100%{ opacity:0; transform:translateY(-38px) scale(1.1);}
+  }
+  .spark{ opacity:0; }
+  .spark.show{ opacity:1; animation:spark .5s ease-in-out infinite alternate; }
+  @keyframes spark{ from{opacity:.3;} to{opacity:1;} }
+
+  .explosion-burst{ opacity:0; transform-origin:center; }
+  .explosion-burst.go{
+    animation: burst .7s cubic-bezier(.2,.8,.3,1) forwards;
+  }
+  @keyframes burst{
+    0%{ opacity:1; transform:scale(.2); }
+    60%{ opacity:1; transform:scale(1.5); }
+    100%{ opacity:0; transform:scale(2.1); }
+  }
+
+  .flash{
+    position:fixed; inset:0; background:#fff; opacity:0; pointer-events:none; z-index:50;
+  }
+  .flash.go{ animation:flash .45s ease-out forwards; }
+  @keyframes flash{ 0%{opacity:.9;} 100%{opacity:0;} }
+
+  /* --- meters --- */
+  .meters{ display:flex; flex-direction:column; gap:14px; }
+
+  .timer-row{ display:flex; align-items:center; gap:16px; }
+  .timer-ring{ position:relative; width:64px; height:64px; flex:0 0 auto; }
+  .timer-ring svg{ transform:rotate(-90deg); }
+  .timer-ring .num{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:19px;
+  }
+  .timer-ring.urgent .num{ color:var(--red); }
+
+  .stability-wrap{ flex:1; }
+  .stability-label{ display:flex; justify-content:space-between; font-size:11.5px; color:var(--text-dim); margin-bottom:6px;}
+  .stability-track{ height:10px; border-radius:6px; background:var(--bg-deep2); border:1px solid var(--line); overflow:hidden;}
+  .stability-fill{ height:100%; border-radius:6px; background:linear-gradient(90deg,var(--green),var(--amber)); transition: width .35s ease, background .35s ease; }
+
+  .category{
+    font-size:12px; color:var(--text-dim);
+    display:flex; align-items:center; gap:8px;
+  }
+  .category b{ color:var(--cyan); font-weight:600; }
+
+  .word-row{
+    display:flex; flex-wrap:wrap; gap:8px; justify-content:center;
+    padding:24px 20px 8px;
+  }
+  .letter-box{
+    width:38px; height:46px;
+    border-bottom:3px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Space Grotesk',sans-serif;
+    font-size:24px; font-weight:700;
+    color:var(--text);
+  }
+  .letter-box.space{ border-bottom-color:transparent; width:20px; }
+  .letter-box.revealed{ border-bottom-color:var(--green); animation:pop .25s ease; }
+  @keyframes pop{ 0%{transform:scale(.6);} 60%{transform:scale(1.15);} 100%{transform:scale(1);} }
+
+  .message{
+    text-align:center; min-height:22px; font-size:13.5px; color:var(--amber);
+    padding:2px 20px 0;
+    transition:.2s;
+  }
+
+  .keyboard{
+    display:grid;
+    grid-template-columns: repeat(9, 1fr);
+    gap:7px;
+    padding:18px 20px 22px;
+  }
+  @media (max-width:520px){ .keyboard{ grid-template-columns: repeat(7,1fr);} }
+  .key{
+    aspect-ratio:1/1;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:var(--bg-deep2);
+    color:var(--text);
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:600;
+    font-size:15px;
+    cursor:pointer;
+    transition:.12s;
+  }
+  .key:hover:not(:disabled){ border-color:var(--cyan); transform:translateY(-1px); }
+  .key:active:not(:disabled){ transform:translateY(0); }
+  .key:disabled{ cursor:default; opacity:.35; }
+  .key.correct{ background:rgba(111,206,127,.18); border-color:var(--green); color:var(--green); opacity:1;}
+  .key.wrong{ background:rgba(226,83,42,.16); border-color:var(--red); color:var(--red); opacity:1;}
+
+  .bottombar{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:12px 20px 18px; border-top:1px solid var(--line);
+  }
+  .ghost-btn{
+    background:transparent; border:1px solid var(--line); color:var(--text-dim);
+    padding:9px 14px; border-radius:9px; font-family:'IBM Plex Mono',monospace; font-size:12.5px; cursor:pointer;
+  }
+  .ghost-btn:hover{ color:var(--text); border-color:var(--cyan); }
+
+  /* ---- overlay result ---- */
+  .overlay{
+    position:fixed; inset:0; background:rgba(6,14,20,.72); backdrop-filter:blur(3px);
+    display:flex; align-items:center; justify-content:center; z-index:40; padding:20px;
+    opacity:0; pointer-events:none; transition:.25s;
+  }
+  .overlay.show{ opacity:1; pointer-events:auto; }
+  .overlay-card{
+    background:linear-gradient(180deg,var(--bg-panel2),var(--bg-panel));
+    border:1px solid var(--line); border-radius:18px; padding:34px; max-width:420px; width:100%;
+    text-align:center; box-shadow:var(--shadow);
+    transform:translateY(10px); transition:.25s;
+  }
+  .overlay.show .overlay-card{ transform:translateY(0); }
+  .overlay-card h2{ font-family:'Space Grotesk',sans-serif; font-size:26px; margin:0 0 8px; }
+  .overlay-card p{ color:var(--text-dim); font-size:14px; line-height:1.6; margin:0 0 22px; }
+  .overlay-card .win-name{ color:var(--green); }
+  .trophy-row{ display:flex; flex-direction:column; gap:8px; margin-bottom:22px; }
+  .trophy-row .row{ display:flex; justify-content:space-between; font-size:14px; padding:8px 12px; background:var(--bg-deep2); border-radius:8px; border:1px solid var(--line);}
+  .trophy-row .row.first{ border-color:var(--green); color:var(--green); }
+
+  .sr-only{
+    position:absolute; width:1px;height:1px; overflow:hidden; clip:rect(0,0,0,0);
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="grid-overlay"></div>
+<div class="flash" id="flash"></div>
+
+<div class="app">
+
+  <!-- ===================== SETUP ===================== -->
+  <section class="card" id="setup">
+    <p class="kicker">Consola de laboratorio · reto de ciencia</p>
+    <h1 class="title">El laboratorio está en peligro</h1>
+    <p class="lede">
+      Cada equipo tiene 30 segundos para adivinar letras de la palabra secreta. Cada error acerca al
+      científico un paso más a la explosión. Acierten a tiempo o el experimento no saldrá bien.
+    </p>
+
+    <div class="field">
+      <label>¿Cuántos equipos juegan?</label>
+      <div class="team-count" id="teamCount">
+        <button class="count-btn" data-n="2">2 equipos</button>
+        <button class="count-btn" data-n="3">3 equipos</button>
+        <button class="count-btn" data-n="4">4 equipos</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Nombres de los equipos</label>
+      <div class="team-names" id="teamNames"></div>
+    </div>
+
+    <button class="start-btn" id="startBtn">Encender el laboratorio</button>
+
+    <div class="sound-row">
+      <div class="toggle on" id="soundToggle"></div>
+      <span id="soundLabel">Efectos de sonido activados</span>
+    </div>
+  </section>
+
+  <!-- ===================== GAME ===================== -->
+  <section class="game-shell hidden" id="game">
+    <div class="topbar">
+      <div class="brand"><span class="dot" id="statusDot"></span><span>Laboratorio en peligro</span></div>
+      <div class="round-tag" id="roundTag">Ronda 1 / 8</div>
+      <button class="icon-btn" id="soundToggle2" title="Silenciar / activar sonido">♪</button>
+    </div>
+
+    <div class="scoreboard" id="scoreboard"></div>
+
+    <div class="stage">
+      <div class="lab-scene" id="labScene">
+        <svg viewBox="0 0 200 200" aria-hidden="true">
+          <!-- table -->
+          <rect x="10" y="168" width="180" height="8" rx="3" fill="#0a2233"/>
+          <!-- scientist -->
+          <g id="scientist">
+            <circle cx="150" cy="70" r="16" fill="#f2c9a0"/>
+            <path id="sciHairA" d="M136 62 Q150 44 164 62" stroke="#3a3a3a" stroke-width="6" fill="none" stroke-linecap="round"/>
+            <rect x="141" y="86" width="18" height="40" rx="7" fill="#e7f1f4"/>
+            <rect x="132" y="90" width="10" height="30" rx="5" fill="#e7f1f4" id="armL"/>
+            <rect x="158" y="90" width="10" height="30" rx="5" fill="#e7f1f4" id="armR"/>
+            <!-- goggles -->
+            <circle cx="144" cy="69" r="5" fill="#173a53" stroke="#5fd0e8" stroke-width="1.5"/>
+            <circle cx="156" cy="69" r="5" fill="#173a53" stroke="#5fd0e8" stroke-width="1.5"/>
+            <line x1="149" y1="69" x2="151" y2="69" stroke="#5fd0e8" stroke-width="1.5"/>
+            <!-- mouth changes by stage -->
+            <path id="sciMouth" d="M146 78 Q150 80 154 78" stroke="#7a4b33" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <!-- eyebrows for worry -->
+            <path id="browL" d="M141 63 Q144 61 147 63" stroke="#3a3a3a" stroke-width="1.6" fill="none" opacity="0"/>
+            <path id="browR" d="M153 63 Q156 61 159 63" stroke="#3a3a3a" stroke-width="1.6" fill="none" opacity="0"/>
+            <!-- sweat drop -->
+            <path id="sweat" class="spark" d="M162 58 q3 4 0 7 q-3 -1 -3 -4 q0 -2 3 -3z" fill="#5fd0e8" opacity="0"/>
+          </g>
+
+          <!-- flask stand -->
+          <line x1="55" y1="60" x2="55" y2="168" stroke="#204a67" stroke-width="3"/>
+          <line x1="30" y1="100" x2="80" y2="100" stroke="#204a67" stroke-width="3"/>
+          <line x1="55" y1="100" x2="55" y2="108" stroke="#204a67" stroke-width="3"/>
+
+          <!-- flask -->
+          <g id="flaskGroup">
+            <path d="M46 108 L46 128 L20 165 Q16 172 24 172 L86 172 Q94 172 90 165 L64 128 L64 108 Z"
+                  fill="rgba(95,208,232,.06)" stroke="#3f7c9c" stroke-width="2.5"/>
+            <clipPath id="flaskClip">
+              <path d="M46 108 L46 128 L20 165 Q16 172 24 172 L86 172 Q94 172 90 165 L64 128 L64 108 Z"/>
+            </clipPath>
+            <g clip-path="url(#flaskClip)">
+              <rect id="liquid" class="liquid" x="14" y="150" width="82" height="30" fill="#6fce7f"/>
+              <circle class="bubble" id="b1" cx="45" cy="150" r="3" fill="#eafff0"/>
+              <circle class="bubble" id="b2" cx="58" cy="155" r="2.4" fill="#eafff0"/>
+              <circle class="bubble" id="b3" cx="66" cy="148" r="2" fill="#eafff0"/>
+            </g>
+            <rect x="42" y="98" width="26" height="10" rx="2" fill="#3f7c9c"/>
+          </g>
+
+          <!-- sparks around flask when unstable -->
+          <path class="spark" id="spk1" d="M14 120 l4 -4 M10 128 l5 1" stroke="#f0a83c" stroke-width="2" stroke-linecap="round"/>
+          <path class="spark" id="spk2" d="M96 120 l-4 -4 M100 128 l-5 1" stroke="#f0a83c" stroke-width="2" stroke-linecap="round"/>
+
+          <!-- explosion burst -->
+          <g id="explosionBurst" class="explosion-burst">
+            <circle cx="55" cy="140" r="10" fill="#fff4de"/>
+            <circle cx="55" cy="140" r="28" fill="#f0a83c" opacity=".85"/>
+            <circle cx="55" cy="140" r="46" fill="#e2532a" opacity=".55"/>
+            <g stroke="#f0a83c" stroke-width="4" stroke-linecap="round">
+              <line x1="55" y1="140" x2="55" y2="90"/>
+              <line x1="55" y1="140" x2="55" y2="190"/>
+              <line x1="55" y1="140" x2="12" y2="140"/>
+              <line x1="55" y1="140" x2="98" y2="140"/>
+              <line x1="55" y1="140" x2="24" y2="109"/>
+              <line x1="55" y1="140" x2="86" y2="109"/>
+              <line x1="55" y1="140" x2="24" y2="171"/>
+              <line x1="55" y1="140" x2="86" y2="171"/>
+            </g>
+          </g>
+        </svg>
+      </div>
+
+      <div class="meters">
+        <div class="category">Categoría: <b id="categoryLabel">Ciencias naturales</b></div>
+
+        <div class="timer-row">
+          <div class="timer-ring" id="timerRing">
+            <svg width="64" height="64" viewBox="0 0 64 64">
+              <circle cx="32" cy="32" r="27" stroke="#204a67" stroke-width="6" fill="none"/>
+              <circle id="timerCircle" cx="32" cy="32" r="27" stroke="#5fd0e8" stroke-width="6" fill="none"
+                      stroke-linecap="round" stroke-dasharray="169.6" stroke-dashoffset="0"/>
+            </svg>
+            <div class="num" id="timerNum">30</div>
+          </div>
+          <div class="stability-wrap">
+            <div class="stability-label"><span>Estabilidad del experimento</span><span id="stabilityText">100%</span></div>
+            <div class="stability-track"><div class="stability-fill" id="stabilityFill" style="width:100%"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="word-row" id="wordRow"></div>
+    <div class="message" id="message">&nbsp;</div>
+
+    <div class="keyboard" id="keyboard"></div>
+
+    <div class="bottombar">
+      <button class="ghost-btn" id="restartBtn">Reiniciar juego</button>
+      <button class="ghost-btn" id="skipBtn">Saltar palabra</button>
+    </div>
+  </section>
+
+</div>
+
+<!-- ===================== RESULT OVERLAY ===================== -->
+<div class="overlay" id="overlay">
+  <div class="overlay-card">
+    <h2 id="overlayTitle">¡Laboratorio a salvo!</h2>
+    <p id="overlaySubtitle">El experimento salió según lo previsto.</p>
+    <div class="trophy-row" id="trophyRow"></div>
+    <button class="start-btn" id="overlayBtn">Siguiente palabra</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------------------------------------------------
+     PALABRAS: ciencias naturales y medio ambiente
+  ---------------------------------------------------------- */
+  var WORD_BANK = [
+    { w:"FOTOSINTESIS", cat:"Biología" },
+    { w:"ECOSISTEMA", cat:"Ecología" },
+    { w:"BIODIVERSIDAD", cat:"Ecología" },
+    { w:"RECICLAJE", cat:"Medio ambiente" },
+    { w:"CONTAMINACION", cat:"Medio ambiente" },
+    { w:"ATOMO", cat:"Física y química" },
+    { w:"GRAVEDAD", cat:"Física" },
+    { w:"MOLECULA", cat:"Química" },
+    { w:"MITOCONDRIA", cat:"Biología" },
+    { w:"HABITAT", cat:"Ecología" },
+    { w:"DEFORESTACION", cat:"Medio ambiente" },
+    { w:"CALENTAMIENTO GLOBAL", cat:"Medio ambiente" },
+    { w:"ENERGIA SOLAR", cat:"Medio ambiente" },
+    { w:"CADENA ALIMENTICIA", cat:"Ecología" },
+    { w:"EROSION", cat:"Geología" },
+    { w:"VOLCAN", cat:"Geología" },
+    { w:"HERBIVORO", cat:"Biología" },
+    { w:"POLINIZACION", cat:"Biología" },
+    { w:"BIOMA", cat:"Ecología" },
+    { w:"HUMEDAL", cat:"Medio ambiente" },
+    { w:"OZONO", cat:"Medio ambiente" },
+    { w:"FOSIL", cat:"Geología" },
+    { w:"NUTRIENTE", cat:"Biología" },
+    { w:"EVAPORACION", cat:"Física" },
+    { w:"BIODEGRADABLE", cat:"Medio ambiente" }
+  ];
+
+  var MAX_WRONG = 6;
+  var TURN_SECONDS = 30;
+  var TOTAL_ROUNDS = 8;
+  var TEAM_COLORS = ["#5fd0e8","#f0a83c","#6fce7f","#e2532a"];
+
+  var ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZÑ".split("");
+
+  /* ---------------------------------------------------------
+     ESTADO
+  ---------------------------------------------------------- */
+  var state = {
+    numTeams: 2,
+    teams: [],           // {name, score}
+    activeTeam: 0,
+    deck: [],
+    round: 0,
+    currentWord: null,   // {w, cat}
+    guessed: {},         // letter -> true
+    wrongCount: 0,
+    timeLeft: TURN_SECONDS,
+    timerHandle: null,
+    tickHandle: null,
+    soundOn: true,
+    audioCtx: null,
+    roundOver: false
+  };
+
+  /* ---------------------------------------------------------
+     AUDIO — sintetizado con WebAudio, sin archivos externos
+  ---------------------------------------------------------- */
+  function ctx(){
+    if(!state.audioCtx){
+      state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    return state.audioCtx;
+  }
+
+  function tone(freq, dur, opts){
+    if(!state.soundOn) return;
+    opts = opts || {};
+    var c = ctx();
+    var t0 = c.currentTime;
+    var osc = c.createOscillator();
+    var gain = c.createGain();
+    osc.type = opts.type || "sine";
+    osc.frequency.setValueAtTime(freq, t0);
+    if(opts.slideTo){ osc.frequency.exponentialRampToValueAtTime(opts.slideTo, t0 + dur); }
+    var peak = opts.vol || 0.18;
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.exponentialRampToValueAtTime(peak, t0 + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    osc.connect(gain).connect(c.destination);
+    osc.start(t0);
+    osc.stop(t0 + dur + 0.02);
+  }
+
+  function noiseBurst(dur, vol){
+    if(!state.soundOn) return;
+    var c = ctx();
+    var bufferSize = c.sampleRate * dur;
+    var buffer = c.createBuffer(1, bufferSize, c.sampleRate);
+    var data = buffer.getChannelData(0);
+    for(var i=0;i<bufferSize;i++){
+      data[i] = (Math.random()*2-1) * (1 - i/bufferSize);
+    }
+    var noise = c.createBufferSource();
+    noise.buffer = buffer;
+    var gain = c.createGain();
+    gain.gain.setValueAtTime(vol || 0.35, c.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + dur);
+    var filter = c.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(1200, c.currentTime);
+    noise.connect(filter).connect(gain).connect(c.destination);
+    noise.start();
+  }
+
+  var sfx = {
+    correct: function(){ tone(523.25, .12, {type:"triangle", vol:.2}); setTimeout(function(){tone(783.99,.16,{type:"triangle", vol:.18});},110); },
+    wrong: function(){ tone(220, .28, {type:"sawtooth", slideTo:110, vol:.22}); },
+    tick: function(){ tone(880, .05, {type:"square", vol:.06}); },
+    tickUrgent: function(){ tone(1046, .07, {type:"square", vol:.12}); },
+    select: function(){ tone(660, .05, {type:"sine", vol:.08}); },
+    win: function(){
+      [523.25,659.25,783.99,1046.5].forEach(function(f,i){
+        setTimeout(function(){ tone(f,.22,{type:"triangle", vol:.2}); }, i*110);
+      });
+    },
+    explosion: function(){
+      noiseBurst(.9, .5);
+      tone(60,.7,{type:"sine", slideTo:30, vol:.4});
+      setTimeout(function(){ tone(90,.3,{type:"square", vol:.15}); }, 40);
+    },
+    gameOver: function(){
+      [392,523.25,659.25,523.25,783.99].forEach(function(f,i){
+        setTimeout(function(){ tone(f,.28,{type:"triangle", vol:.22}); }, i*160);
+      });
+    }
+  };
+
+  function playChime(){ if(state.soundOn){ tone(700,.05,{vol:.06}); } }
+
+  /* ---------------------------------------------------------
+     DOM refs
+  ---------------------------------------------------------- */
+  var $ = function(id){ return document.getElementById(id); };
+  var setupEl = $("setup"), gameEl = $("game");
+  var teamCountEl = $("teamCount"), teamNamesEl = $("teamNames"), startBtn = $("startBtn");
+  var scoreboardEl = $("scoreboard"), wordRowEl = $("wordRow"), keyboardEl = $("keyboard");
+  var messageEl = $("message"), roundTagEl = $("roundTag");
+  var timerNumEl = $("timerNum"), timerCircleEl = $("timerCircle"), timerRingEl = $("timerRing");
+  var stabilityFillEl = $("stabilityFill"), stabilityTextEl = $("stabilityText");
+  var categoryLabelEl = $("categoryLabel");
+  var labSceneEl = $("labScene");
+  var overlayEl = $("overlay"), overlayTitleEl = $("overlayTitle"), overlaySubtitleEl = $("overlaySubtitle");
+  var overlayBtn = $("overlayBtn"), trophyRowEl = $("trophyRow");
+  var soundToggle = $("soundToggle"), soundLabel = $("soundLabel"), soundToggle2 = $("soundToggle2");
+  var flashEl = $("flash");
+  var restartBtn = $("restartBtn"), skipBtn = $("skipBtn");
+  var explosionBurst = $("explosionBurst");
+  var liquidEl = $("liquid");
+  var TIMER_CIRC = 169.6;
+
+  /* ---------------------------------------------------------
+     SETUP SCREEN
+  ---------------------------------------------------------- */
+  function buildTeamNameInputs(n){
+    teamNamesEl.innerHTML = "";
+    for(var i=0;i<n;i++){
+      var row = document.createElement("div");
+      row.className = "team-name-row";
+      var sw = document.createElement("div");
+      sw.className = "swatch";
+      sw.style.background = TEAM_COLORS[i];
+      var input = document.createElement("input");
+      input.type = "text";
+      input.maxLength = 18;
+      input.placeholder = "Equipo " + (i+1);
+      input.id = "teamNameInput"+i;
+      row.appendChild(sw);
+      row.appendChild(input);
+      teamNamesEl.appendChild(row);
+    }
+  }
+
+  function selectTeamCount(n){
+    state.numTeams = n;
+    Array.prototype.forEach.call(teamCountEl.children, function(btn){
+      btn.classList.toggle("active", parseInt(btn.dataset.n,10) === n);
+    });
+    buildTeamNameInputs(n);
+  }
+
+  teamCountEl.addEventListener("click", function(e){
+    var btn = e.target.closest(".count-btn");
+    if(!btn) return;
+    selectTeamCount(parseInt(btn.dataset.n,10));
+  });
+
+  function toggleSound(force){
+    state.soundOn = (typeof force === "boolean") ? force : !state.soundOn;
+    soundToggle.classList.toggle("on", state.soundOn);
+    soundLabel.textContent = state.soundOn ? "Efectos de sonido activados" : "Efectos de sonido desactivados";
+    soundToggle2.style.opacity = state.soundOn ? "1" : ".5";
+  }
+  soundToggle.addEventListener("click", function(){ toggleSound(); });
+  soundToggle2.addEventListener("click", function(){ toggleSound(); playChime(); });
+
+  startBtn.addEventListener("click", function(){
+    ctx(); // desbloquear audio con gesto del usuario
+    state.teams = [];
+    for(var i=0;i<state.numTeams;i++){
+      var input = $("teamNameInput"+i);
+      var name = (input && input.value.trim()) ? input.value.trim() : ("Equipo " + (i+1));
+      state.teams.push({ name:name, score:0, color:TEAM_COLORS[i] });
+    }
+    state.activeTeam = 0;
+    state.round = 0;
+    state.deck = shuffle(WORD_BANK.slice()).slice(0, TOTAL_ROUNDS);
+    setupEl.classList.add("hidden");
+    gameEl.classList.remove("hidden");
+    nextRound();
+  });
+
+  function shuffle(arr){
+    for(var i=arr.length-1;i>0;i--){
+      var j = Math.floor(Math.random()*(i+1));
+      var t = arr[i]; arr[i]=arr[j]; arr[j]=t;
+    }
+    return arr;
+  }
+
+  /* init default */
+  selectTeamCount(2);
+
+  /* ---------------------------------------------------------
+     SCOREBOARD
+  ---------------------------------------------------------- */
+  function renderScoreboard(){
+    scoreboardEl.innerHTML = "";
+    state.teams.forEach(function(team, idx){
+      var chip = document.createElement("div");
+      chip.className = "team-chip" + (idx === state.activeTeam ? " active" : "");
+      chip.style.borderColor = idx === state.activeTeam ? team.color : "";
+      chip.innerHTML =
+        '<div class="turn-flag">TURNO</div>' +
+        '<div class="t-name"><span class="swatch" style="background:'+team.color+'"></span>'+escapeHtml(team.name)+'</div>' +
+        '<div class="t-score">'+team.score+'</div>';
+      scoreboardEl.appendChild(chip);
+    });
+  }
+
+  function escapeHtml(s){
+    return s.replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+
+  /* ---------------------------------------------------------
+     RONDA / PALABRA
+  ---------------------------------------------------------- */
+  function nextRound(){
+    state.round++;
+    if(state.round > state.deck.length){
+      return endGame();
+    }
+    state.currentWord = state.deck[state.round - 1];
+    state.guessed = {};
+    state.wrongCount = 0;
+    state.roundOver = false;
+    roundTagEl.textContent = "Ronda " + state.round + " / " + state.deck.length;
+    categoryLabelEl.textContent = state.currentWord.cat;
+    updateStability();
+    resetLabScene();
+    renderWord();
+    renderKeyboard();
+    renderScoreboard();
+    setMessage("Turno de " + state.teams[state.activeTeam].name + ": elijan una letra.");
+    startTimer();
+  }
+
+  function renderWord(){
+    wordRowEl.innerHTML = "";
+    var word = state.currentWord.w;
+    for(var i=0;i<word.length;i++){
+      var ch = word[i];
+      if(ch === " "){
+        var sp = document.createElement("div");
+        sp.className = "letter-box space";
+        wordRowEl.appendChild(sp);
+        continue;
+      }
+      var box = document.createElement("div");
+      box.className = "letter-box";
+      box.dataset.letter = ch;
+      box.textContent = state.guessed[ch] ? ch : "";
+      wordRowEl.appendChild(box);
+    }
+  }
+
+  function renderKeyboard(){
+    keyboardEl.innerHTML = "";
+    ALPHABET.forEach(function(letter){
+      var btn = document.createElement("button");
+      btn.className = "key";
+      btn.textContent = letter;
+      btn.dataset.letter = letter;
+      if(state.guessed[letter]){
+        btn.disabled = true;
+        btn.classList.add(state.currentWord.w.indexOf(letter) > -1 ? "correct" : "wrong");
+      }
+      btn.addEventListener("click", function(){ handleGuess(this.dataset.letter); });
+      keyboardEl.appendChild(btn);
+    });
+  }
+
+  window.addEventListener("keydown", function(e){
+    if(gameEl.classList.contains("hidden")) return;
+    if(overlayEl.classList.contains("show")) return;
+    var k = e.key.toUpperCase();
+    if(ALPHABET.indexOf(k) > -1) handleGuess(k);
+  });
+
+  function wordIsComplete(){
+    var word = state.currentWord.w;
+    for(var i=0;i<word.length;i++){
+      var ch = word[i];
+      if(ch !== " " && !state.guessed[ch]) return false;
+    }
+    return true;
+  }
+
+  function handleGuess(letter){
+    if(state.roundOver || state.guessed[letter]) return;
+    state.guessed[letter] = true;
+    var word = state.currentWord.w;
+    var isCorrect = word.indexOf(letter) > -1;
+
+    var key = keyboardEl.querySelector('[data-letter="'+cssEscape(letter)+'"]');
+    if(key){ key.disabled = true; key.classList.add(isCorrect ? "correct" : "wrong"); }
+
+    if(isCorrect){
+      sfx.correct();
+      revealLetterBoxes(letter);
+      if(wordIsComplete()){
+        winRound();
+        return;
+      }
+      setMessage("¡Bien! Sigue el turno de " + state.teams[state.activeTeam].name + ".");
+    } else {
+      sfx.wrong();
+      state.wrongCount++;
+      updateStability();
+      shakeLab();
+      if(state.wrongCount >= MAX_WRONG){
+        loseRound();
+        return;
+      }
+      setMessage("Letra incorrecta. La estabilidad baja...");
+    }
+  }
+
+  function cssEscape(s){ return s.replace(/[^A-Za-zÑ]/g, "\\\\$&"); }
+
+  function revealLetterBoxes(letter){
+    var boxes = wordRowEl.querySelectorAll('.letter-box[data-letter="'+cssEscape(letter)+'"]');
+    boxes.forEach(function(b){
+      b.textContent = letter;
+      b.classList.add("revealed");
+    });
+  }
+
+  function updateStability(){
+    var pct = Math.round(((MAX_WRONG - state.wrongCount) / MAX_WRONG) * 100);
+    stabilityFillEl.style.width = pct + "%";
+    stabilityTextEl.textContent = pct + "%";
+    var color = pct > 60 ? "linear-gradient(90deg,#6fce7f,#f0a83c)" :
+                pct > 30 ? "linear-gradient(90deg,#f0a83c,#e2532a)" :
+                "linear-gradient(90deg,#e2532a,#a3311a)";
+    stabilityFillEl.style.background = color;
+    updateLabStage();
+  }
+
+  /* ---------------------------------------------------------
+     ESCENA DE LABORATORIO
+  ---------------------------------------------------------- */
+  function resetLabScene(){
+    liquidEl.setAttribute("y", "150");
+    liquidEl.setAttribute("height", "30");
+    liquidEl.setAttribute("fill", "#6fce7f");
+    ["b1","b2","b3"].forEach(function(id){ $(id).classList.remove("show"); });
+    ["spk1","spk2"].forEach(function(id){ $(id).classList.remove("show"); });
+    $("sweat").style.opacity = 0;
+    $("browL").style.opacity = 0;
+    $("browR").style.opacity = 0;
+    $("sciMouth").setAttribute("d", "M146 78 Q150 80 154 78");
+    explosionBurst.classList.remove("go");
+    explosionBurst.style.opacity = 0;
+    labSceneEl.style.opacity = 1;
+    labSceneEl.style.filter = "";
+  }
+
+  function updateLabStage(){
+    var n = state.wrongCount;
+    var top = 150 - n * 14;
+    var height = 30 + n * 14;
+    liquidEl.setAttribute("y", String(top));
+    liquidEl.setAttribute("height", String(height));
+
+    var colors = ["#6fce7f","#94d16b","#c7cf4e","#e8b23c","#f0862f","#e2532a"];
+    liquidEl.setAttribute("fill", colors[Math.min(n, colors.length-1)]);
+
+    if(n >= 1){ $("b1").classList.add("show"); }
+    if(n >= 2){ $("b2").classList.add("show"); $("browL").style.opacity = 1; $("browR").style.opacity = 1; }
+    if(n >= 3){ $("b3").classList.add("show"); $("sciMouth").setAttribute("d","M146 79 Q150 76 154 79"); }
+    if(n >= 4){ $("spk1").classList.add("show"); $("spk2").classList.add("show"); $("sweat").style.opacity = 1; }
+    if(n >= 5){ $("sciMouth").setAttribute("d","M145 80 Q150 74 155 80"); }
+  }
+
+  function shakeLab(){
+    labSceneEl.classList.remove("shake");
+    void labSceneEl.offsetWidth;
+    labSceneEl.classList.add("shake");
+  }
+
+  function triggerExplosion(){
+    sfx.explosion();
+    flashEl.classList.remove("go"); void flashEl.offsetWidth; flashEl.classList.add("go");
+    explosionBurst.style.opacity = 1;
+    explosionBurst.classList.add("go");
+    shakeLab();
+    labSceneEl.classList.add("shake");
+    setTimeout(function(){
+      labSceneEl.style.filter = "grayscale(.5) brightness(.8)";
+      $("sciMouth").setAttribute("d","M144 80 Q150 72 156 80");
+    }, 500);
+  }
+
+  /* ---------------------------------------------------------
+     TEMPORIZADOR
+  ---------------------------------------------------------- */
+  function startTimer(){
+    clearInterval(state.timerHandle);
+    state.timeLeft = TURN_SECONDS;
+    updateTimerDisplay();
+    timerRingEl.classList.remove("urgent");
+    state.timerHandle = setInterval(function(){
+      state.timeLeft--;
+      updateTimerDisplay();
+      if(state.timeLeft <= 10 && state.timeLeft > 0){
+        timerRingEl.classList.add("urgent");
+        sfx.tickUrgent();
+      } else if(state.timeLeft > 10){
+        sfx.tick();
+      }
+      if(state.timeLeft <= 0){
+        clearInterval(state.timerHandle);
+        turnTimeExpired();
+      }
+    }, 1000);
+  }
+
+  function updateTimerDisplay(){
+    timerNumEl.textContent = Math.max(state.timeLeft, 0);
+    var frac = Math.max(state.timeLeft, 0) / TURN_SECONDS;
+    timerCircleEl.setAttribute("stroke-dashoffset", String(TIMER_CIRC * (1 - frac)));
+    timerCircleEl.setAttribute("stroke", state.timeLeft <= 10 ? "#e2532a" : "#5fd0e8");
+  }
+
+  function turnTimeExpired(){
+    if(state.roundOver) return;
+    setMessage("⏱ Se acabó el tiempo. Turno para " + nextTeamName() + ".");
+    passTurn();
+  }
+
+  function nextTeamName(){
+    var idx = (state.activeTeam + 1) % state.teams.length;
+    return state.teams[idx].name;
+  }
+
+  function passTurn(){
+    state.activeTeam = (state.activeTeam + 1) % state.teams.length;
+    renderScoreboard();
+    startTimer();
+  }
+
+  /* ---------------------------------------------------------
+     FIN DE RONDA
+  ---------------------------------------------------------- */
+  function winRound(){
+    state.roundOver = true;
+    clearInterval(state.timerHandle);
+    sfx.win();
+    state.teams[state.activeTeam].score += 10 + Math.max(0, state.timeLeft);
+    renderScoreboard();
+    labSceneEl.style.filter = "";
+    $("sciMouth").setAttribute("d","M144 76 Q150 84 156 76");
+    setMessage("¡Experimento estabilizado por " + state.teams[state.activeTeam].name + "!");
+    setTimeout(function(){ showOverlay(true); }, 600);
+  }
+
+  function loseRound(){
+    state.roundOver = true;
+    clearInterval(state.timerHandle);
+    revealAll();
+    triggerExplosion();
+    setMessage("💥 El experimento explotó. La palabra era " + state.currentWord.w + ".");
+    setTimeout(function(){ showOverlay(false); }, 1000);
+  }
+
+  function revealAll(){
+    var word = state.currentWord.w;
+    for(var i=0;i<word.length;i++){
+      if(word[i] !== " ") state.guessed[word[i]] = true;
+    }
+    renderWord();
+  }
+
+  function showOverlay(won){
+    overlayTitleEl.textContent = won ? "¡Laboratorio a salvo!" : "¡Boom! Experimento fallido";
+    overlaySubtitleEl.innerHTML = won
+      ? 'El equipo <span class="win-name">' + escapeHtml(state.teams[state.activeTeam].name) + '</span> completó la palabra a tiempo.'
+      : 'Nadie completó "' + state.currentWord.w + '" antes de que se agotaran las opciones.';
+
+    var sorted = state.teams.map(function(t,i){ return {name:t.name, score:t.score, idx:i}; })
+                             .sort(function(a,b){ return b.score - a.score; });
+    trophyRowEl.innerHTML = "";
+    sorted.forEach(function(t, rank){
+      var row = document.createElement("div");
+      row.className = "row" + (rank === 0 ? " first" : "");
+      row.innerHTML = "<span>"+ (rank+1) +". " + escapeHtml(t.name) + "</span><span>" + t.score + " pts</span>";
+      trophyRowEl.appendChild(row);
+    });
+
+    var isLastRound = state.round >= state.deck.length;
+    overlayBtn.textContent = isLastRound ? "Ver resultado final" : "Siguiente palabra";
+    overlayEl.classList.add("show");
+  }
+
+  overlayBtn.addEventListener("click", function(){
+    overlayEl.classList.remove("show");
+    if(state.round >= state.deck.length){
+      endGame();
+    } else {
+      if(!winRoundKeepsTurn()) { /* no-op placeholder for clarity */ }
+      nextRound();
+    }
+  });
+
+  // si ganaron, el mismo equipo empieza la siguiente ronda? -> rotamos siempre para dar oportunidad pareja
+  function winRoundKeepsTurn(){
+    state.activeTeam = (state.activeTeam + 1) % state.teams.length;
+    return true;
+  }
+
+  /* ---------------------------------------------------------
+     FIN DEL JUEGO
+  ---------------------------------------------------------- */
+  function endGame(){
+    clearInterval(state.timerHandle);
+    sfx.gameOver();
+    var sorted = state.teams.map(function(t){ return t; }).sort(function(a,b){ return b.score-a.score; });
+    overlayTitleEl.textContent = "Fin del experimento 🔬";
+    overlaySubtitleEl.innerHTML = 'El equipo campeón es <span class="win-name">' + escapeHtml(sorted[0].name) + '</span>.';
+    trophyRowEl.innerHTML = "";
+    sorted.forEach(function(t, rank){
+      var row = document.createElement("div");
+      row.className = "row" + (rank === 0 ? " first" : "");
+      row.innerHTML = "<span>"+ (rank+1) +". " + escapeHtml(t.name) + "</span><span>" + t.score + " pts</span>";
+      trophyRowEl.appendChild(row);
+    });
+    overlayBtn.textContent = "Jugar de nuevo";
+    overlayBtn.onclick = function(){ location.reload(); };
+    overlayEl.classList.add("show");
+  }
+
+  /* ---------------------------------------------------------
+     UI helpers
+  ---------------------------------------------------------- */
+  function setMessage(msg){ messageEl.textContent = msg; }
+
+  restartBtn.addEventListener("click", function(){
+    if(confirm("¿Reiniciar el juego desde el inicio?")) location.reload();
+  });
+
+  skipBtn.addEventListener("click", function(){
+    if(state.roundOver) return;
+    setMessage("Palabra saltada por el equipo en turno.");
+    clearInterval(state.timerHandle);
+    state.roundOver = true;
+    revealAll();
+    setTimeout(function(){ showOverlay(false); }, 300);
+  });
+
+})();
+</script>
+</body>
+</html>
